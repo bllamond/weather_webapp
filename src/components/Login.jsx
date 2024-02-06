@@ -2,36 +2,51 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Form, Alert } from "react-bootstrap";
 import { Button } from "react-bootstrap";
-// import GoogleButton from "react-google-button";
+import GoogleButton from "react-google-button";
 import { useUserAuth } from "../AuthContext";
 
+
+function uniqueId(){
+  let result = '';
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  const charactersLength = characters.length;
+  for (let i = 0; i < 9; i++) {
+    result += characters.charAt(Math.floor(Math.random() * charactersLength));
+  }
+  return result;
+};
+
 const Login = () => {
+  const firebase = useUserAuth();
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [password, setPassword] = useState(" ");
   const [error, setError] = useState("");
   const { logIn, googleSignIn } = useUserAuth();
   const navigate = useNavigate();
+  console.log("firebase" , firebase);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
     try {
-      await logIn(email, password);
+      await firebase.logIn(email, password);
+      firebase.putData("users/" + uniqueId() , {email,password});
       navigate("/home");
+      console.log("bas bhai");
     } catch (err) {
       setError(err.message);
     }
   };
 
-  // const handleGoogleSignIn = async (e) => {
-  //   e.preventDefault();
-  //   try {
-  //     await googleSignIn();
-  //     navigate("/home");
-  //   } catch (error) {
-  //     console.log(error.message);
-  //   }
-  // };
+  const handleGoogleSignIn = async (e) => {
+    e.preventDefault();
+    try {
+      await googleSignIn();
+      navigate("/home");
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
 
   return (
     <>
@@ -64,14 +79,14 @@ const Login = () => {
             </Button>
           </div>
         </Form>
-        {/* <hr /> */}
-        {/* <div>
+        <hr /> 
+        <div>
           <GoogleButton
             className="g-btn"
             type="dark"
             onClick={handleGoogleSignIn}
           />
-        </div> */}
+        </div>
       </div>
       <div className="p-4 box mt-3 text-center">
         Don't have an account? <Link to="/signup">Sign up</Link>
